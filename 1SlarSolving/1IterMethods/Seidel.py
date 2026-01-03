@@ -1,12 +1,24 @@
 import numpy as np
 from scipy import linalg
 
-from Setup import set_x0, set_matrix, set_vector
+# from Setup import set_x0, set_matrix, set_vector
 from SimpleIter import matrix_norm_calculator, print_vector_as_sequece
 
+def set_matrix():
+    """ функцiя для задання матрицi СЛАР"""
+    matrix=np.array([[10, 1, 2],[1,5,-1],[1,-2,10]],dtype='float64' )
+    return matrix
+def set_vector():
+    """ функцiя для задання вектора вiльних членiв СЛАР"""
+    vector=np.array([[18], [8], [27]],dtype='float64')
+    return vector
+def set_x0():
+    """ функцiя для задання вектора початкового наближення розв'язку"""
+    return np.array([[1], [2], [1]],dtype='float64')
+
+
 def Seidel_solver(set_matrix, set_vector,set_x0, eps):
-    """ Задає алгоритм застосування методу Зейделя при чисельному розв'язуваннi␣
-    ,→СЛАР (2.125),
+    """ Задає алгоритм застосування методу Зейделя при чисельному розв'язуваннi СЛАР (2.125),
     як початкове наближення можна задати довiльний вектор"""
     a = set_matrix()
     d = set_vector()
@@ -24,23 +36,17 @@ def Seidel_solver(set_matrix, set_vector,set_x0, eps):
     return vector_norm, k_iteract, x
 
 def Seidel_Jacobi_modification(a, b):
-    n = a.shape[0]
-    # Робимо копії, щоб не псувати оригінали
-    a_mod = a.copy()
-    b_mod = b.copy()
-    
-    for i in range(n):
-        if a_mod[i, i] == 0:
-            raise Exception(f"Нуль на діагоналі в рядку {i}!")
-        
-        div = a_mod[i, i]
-        b_mod[i] /= div
-        a_mod[i, :] /= -div
-        a_mod[i, i] = 0  # Тепер це матриця B
-        
-    # Розщеплення на нижню (f) та верхню (h) трикутні матриці
-    f = np.tril(a_mod) 
-    h = a_mod - f
+    for i in range(a.shape[0]):
+        if a[i,i] == 0 :
+            raise Exception(f'Метод Зейделя не застосовано,\n a[i,i]==0 при i={i}',i)
+        b[i] /= a[i,i]
+        a[i,:] /= -a[i,i]
+
+    f = a.copy()
+    h = a.copy()
+    for i in range(a.shape[0]):
+        f[i,i+1:] = 0
+        h[i,:i+1] = 0
     return f, h
 
 def Seidel_iteration(b,d,x0,eps,kmax, norm):
@@ -57,14 +63,17 @@ def Seidel_iteration(b,d,x0,eps,kmax, norm):
     x_n[0] = ( b[0,1:] * x_prev[1:] ).sum() + d[0]
     for i in range(1,n):
         x_n[i] = ( b[i,:i] * x_n[:i] ).sum() + ( b[i,i+1:] * x_prev[i+1:] ).sum() + d[i]
+    
     while norm(x_n - x_prev) > eps and k < kmax:
         x_prev=x_n.copy()
         k+=1
         x_n[0] = ( b[0,1:] * x_prev[1:]).sum() + d[0]
         for i in range(1,n):
-            x_n[i] = ( b[i,:i] * x_n[:i] ).sum() + ( b[i,i+1:] * x_prev[i+1:] ).sum() + d[i]
+           x_n[i] = ( b[i,:i] * x_n[:i] ).sum() + ( b[i,i+1:] * x_prev[i+1:] ).sum() + d[i]
+
     if k == kmax :
         raise Exception(f'Методом Зейделя точнiсть eps={eps} не досягнута за k={k} iтерацiй',k)
+    
     return k, x_n
 
 def expected_number_of_iterations_2(matrix, vector, eps):
@@ -72,17 +81,17 @@ def expected_number_of_iterations_2(matrix, vector, eps):
     nd = vector_norm(vector)
     return int(np.log2(eps*(1-nb_min)/nd) / np.log2(nb_min)) + 1, vector_norm
 
-
-for n in {5,7,9,11,13,15}:
-    eps=10**(-n)
-    try:
-        rn,k, xk = Seidel_solver(set_matrix, set_vector, set_x0, eps)
-    except Exception as e:
-        print(e.args[0])
-    else :
-        print(f"Чисельний розв'язок СЛАР \n x=[",end=' ' )
-        print_vector_as_sequece(xk)
-        print(f"]\n точнiсть eps={eps}, к-сть iтерацiй k={k}" )
+if __name__ == "__main__":
+    for n in {5,7,9,11,13,15}:
+        eps=10**(-n)
+        try:
+            rn,k, xk = Seidel_solver(set_matrix, set_vector, set_x0, eps)
+        except Exception as e:
+            print(e.args[0])
+        else :
+            print(f"Чисельний розв'язок СЛАР \n x=[",end=' ' )
+            print_vector_as_sequece(xk)
+            print(f"]\n точнiсть eps={eps}, к-сть iтерацiй k={k}" )
 
 
 # a = set_matrix()

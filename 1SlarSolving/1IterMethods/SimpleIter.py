@@ -1,6 +1,6 @@
 import numpy as np
 
-from Setup import set_matrix, set_vector
+#from Setup import set_matrix, set_vector
 
 #МЕТОД ПРОСТОЇ ІТЕРАЦІЇ
 def simple_iteration_solver(set_matrix, set_vector, eps):
@@ -57,7 +57,8 @@ def matrix_norm_calculator(matrix):
     nb2 = norm_2(matrix)
     nb_min = min(nb1,nb2)
     if nb_min >= 1 :
-        raise Exception(f'Метод простої iтерацiї не застосовано,\n Норма,→матрицi={nb_min}',nb_min)
+        #raise Exception(f'Метод простої iтерацiї не застосовано,\n Норма,→матрицi={nb_min}',nb_min)
+        print(f'Увага: Метод простої iтерацiї може не збiгтися,\n Норма,→матрицi={nb_min}')
     if nb1 < nb2 :
         vector_norm = norm_1v
     else:
@@ -100,6 +101,14 @@ def print_vector_as_sequece(a):
 
 
 if __name__ == "__main__":
+
+    def set_matrix():
+        """ функцiя для задання матрицi конкретної СЛАР"""
+        return np.array([[0, -0.1, -0.2],[-0.2,0,0.2],[-0.1,0.2,0]], dtype='float64')
+    def set_vector():
+        """ функцiя для задання вектора вiльних членiв конкретної СЛАР"""
+        return np.array([[1.8], [1.6], [2.7]], dtype='float64')
+
     for n in {5,7,9,11,13,15}:
         eps=10**(-n)
         try:

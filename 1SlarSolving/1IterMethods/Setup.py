@@ -11,6 +11,7 @@ def set_matrix():
     
     # Перетворення: A_new = A.T @ A
     return A.T @ A
+    return  A
 
 def set_vector():
     A = np.array([
@@ -23,7 +24,10 @@ def set_vector():
     
     # Перетворення: b_new = A.T @ b
     return A.T @ b
+    return b
 
 def set_x0():
     """ функцiя для задання вектора початкового наближення розв'язку"""
     return np.array([[1], [1], [1], [1]],dtype='float64')
+
+

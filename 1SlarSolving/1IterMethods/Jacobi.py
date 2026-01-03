@@ -34,41 +34,15 @@ def expected_number_of_iterations_2(matrix, vector, eps):
     nd = vector_norm(vector)
     return int(np.log2(eps*(1-nb_min)/nd) / np.log2(nb_min)) + 1, vector_norm
 
+if __name__ == "__main__":
+    for n in {5,7,9,11,13,15}:
+        eps=10**(-n)
+        try:
+            rn, k,xk = Jacobi_solver(set_matrix, set_vector, set_x0, eps)
+        except Exception as e:
+            print(e.args[0])
+        else :
+            print(f"Чисельний розв'язок СЛАР \n x=[",end=' ' )
+            print_vector_as_sequece(xk)
+            print(f"]\n точнiсть eps={eps}, к-сть iтерацiй k={k}" )
 
-for n in {5,7,9,11,13,15}:
-    eps=10**(-n)
-    try:
-        rn, k,xk = Jacobi_solver(set_matrix, set_vector, set_x0, eps)
-    except Exception as e:
-        print(e.args[0])
-    else :
-        print(f"Чисельний розв'язок СЛАР \n x=[",end=' ' )
-        print_vector_as_sequece(xk)
-        print(f"]\n точнiсть eps={eps}, к-сть iтерацiй k={k}" )
-
-
-
-# До 4 . is_Jacobi_convergent що виконує перевiрку збiжностi iтерацiйного процесу Якобi для довiльної матрицi.
-
-def is_Jacobi_convergent(A):
-    """
-    Перевіряє достатню умову збіжності методу Якобі:
-    наявність діагонального переважання або ||B|| < 1.
-    """
-    n = A.shape[0]
-    # Перевірка на нулі на діагоналі
-    if any(np.diag(A) == 0):
-        return False
-    
-    # Створюємо матрицю B (як у Jacobi_modification)
-    B = np.zeros_like(A, dtype=float)
-    for i in range(n):
-        B[i, :] = -A[i, :] / A[i, i]
-        B[i, i] = 0
-        
-    # Перевіряємо три основні матричні норми
-    norm_inf = np.linalg.norm(B, ord=np.inf) # Макс. сума модулів елементів рядка
-    norm_1 = np.linalg.norm(B, ord=1)     # Макс. сума модулів елементів стовпця
-    norm_2 = np.linalg.norm(B, ord='fro') # Фробеніусова норма (як апроксимація спектральної)
-
-    return norm_inf < 1 or norm_1 < 1 or norm_2 < 1
