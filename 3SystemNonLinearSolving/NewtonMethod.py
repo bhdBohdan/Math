@@ -3,7 +3,8 @@ import numpy as np
 from scipy import linalg
 import pandas as pd
 
-from SimpleIterationMethod import norm_3
+def norm_3(a):
+    return np.sqrt(np.sum(a**2))
 
 def Newton_iteration(f,invJ, x0, eps, kmax=1000):
     x_prev=x0.copy()
