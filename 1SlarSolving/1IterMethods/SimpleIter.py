@@ -36,6 +36,22 @@ def simple_iteration(b,d,x0,eps,kmax,norm):
         raise Exception(f'Методом iтерацiй точнiсть eps={eps} не досягнута за k={k},→iтерацiй',k)
     return k, x_new
 
+def simple_iteration_recursive(b, d, x_prev, eps, kmax, norm, k=0):
+    """
+    Рекурсивне обчислення наближення розв'язку СЛАР x = Bx + d.
+    """
+    x_new = np.matmul(b, x_prev) + d
+    k += 1
+
+    if norm(x_new - x_prev) <= eps:
+        return k, x_new
+
+    if k >= kmax:
+        raise Exception(f'Методом iтерацiй точнiсть eps={eps} не досягнута за k={k} iтерацiй', k)
+
+   
+    return simple_iteration_recursive(b, d, x_new, eps, kmax, norm, k)
+
 def matrix_norm_calculator(matrix):
     nb1 = norm_1(matrix)
     nb2 = norm_2(matrix)
@@ -77,19 +93,20 @@ def norm_2(a):
     return m
 
 def print_vector_as_sequece(a):
-    """друк вектора у виглядi послiдовностi чисел"""
-    x=a.reshape(len(a))
-    for i in range(len(a)):
-        print(f"{x[i]:19.16}", end=' ')
+    """ друк вектора будь-якої форми (стовпчик чи рядок)"""
+    x = np.ravel(a) 
+    for val in x:
+        print(f"{val:19.16f}", end=' ')
 
 
-for n in {5,7,9,11,13,15}:
-    eps=10**(-n)
-    try:
-         rn,k, xk = simple_iteration_solver(set_matrix, set_vector, eps)
-    except Exception as e:
-        print(e.args[0])
-    else :
-        print(f"Чисельний розв'язок СЛАР \n x=[",end=' ' )
-        print_vector_as_sequece(xk)
-        print(f"]\n точнiсть eps={eps}, к-сть iтерацiй k={k}" )
+if __name__ == "__main__":
+    for n in {5,7,9,11,13,15}:
+        eps=10**(-n)
+        try:
+            rn,k, xk = simple_iteration_solver(set_matrix, set_vector, eps)
+        except Exception as e:
+            print(e.args[0])
+        else :
+            print(f"Чисельний розв'язок СЛАР \n x=[",end=' ' )
+            print_vector_as_sequece(xk)
+            print(f"]\n точнiсть eps={eps}, к-сть iтерацiй k={k}" )

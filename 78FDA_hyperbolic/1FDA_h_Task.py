@@ -4,6 +4,8 @@ import pandas as pd
 from scipy import linalg
 from mpl_toolkits import mplot3d
 
+from AnimationFunction import animate_string
+
 def FDA_H_solver( f,mu,nu,phi,psi,nxst,ntst,mx,mt,kiter,etalon= None,**kwargs):
     """ Розв'язування початково-крайової задачi для хвильового рiвняння
     методом скiнчених рiзниць
@@ -96,58 +98,78 @@ def d3_plotter(u,T,l,Nt,Nx,ks=1):
         surf = ax.plot_wireframe(Y, X, u, rstride=5, cstride=5)
         plt.show()
 
-# приклад задачі 1
+# --- функції для задачі 5)---
 
-# utt − a
-# 2uxx = sin(αt) (α
-# 2
-# lx − α
-# 2x
-# 2 − 2a
-# 2
-# ), (x, t) ∈ (0, l) × (0, T], (7.130)
-# u|x=0 = 0, u|x=l = 0, t ∈ (0, T], (7.131)
-# u|t=0 = 0, ut|t=0 = αx(x − l), x ∈ [0, l],
+def f(x, t, **kwargs):
+    return -240 / (5*x + t + 2)**3
 
-def f(x,t,**kwargs):
-    return np.sin(kwargs['alpha']*t)*(kwargs['alpha']**2 * kwargs['l'] * x - 
-kwargs['alpha']**2 * x**2 - 2*kwargs['a']**2)
-def phi(x,**kwargs):
-    return 0
-def psi(x,**kwargs):
-    return kwargs['alpha']*x*(x - kwargs['l'])
-def mu(t,**kwargs):
-    return 0
-def nu(t,**params):
-    return 0
+def phi(x, **kwargs):
+    return 5 / (5*x + 2)
 
-def exact_solution(x,t,**kwargs):
-    return x*(x - kwargs['l'])*np.sin(kwargs['alpha']*t)
+def psi(x, **kwargs):
+    return -5 / (5*x + 2)**2
+
+def mu(t, **kwargs):
+    return 5 / (t + 2)
+
+def nu(t, **kwargs):
+    return 5 / (t + 7)
+
+def exact_solution(x, t, **kwargs):
+    return 5 / (5*x + t + 2)
+
+
+
+# --- Виконання ---
 
 if __name__ == "__main__":
-    params = {'a':1, 'alpha': 2., 'l': 4.,'T':6}
-    Nx_start = 8
-    Nt_start = 12
-    kiter = 5
-    mx = 2
-    mt = 2
-    Nx = Nx_start
-    Nt = Nt_start
-    etalon = grid_tabulator(exact_solution,Nx,Nt,**params)
-    u,solutions,errors,eoc =FDA_H_solver(f,mu,nu,phi,psi,Nx,Nt,mx,mt,kiter,etalon,**params)
+    # Параметри з вашого малюнка
+    params = {'a': 1.0, 'l': 1.0, 'T': 1.0}
+    
+    # Кроки h=0.1, tau=0.1 відповідно до умови m,n = 0...10
+    Nx_start = 10
+    Nt_start = 10
+    
+    kiter = 3 # Кількість ітерацій для перевірки збіжності (подвоєння сітки)
+    mx, mt = 2, 2
+    
+    # Створення еталонного розв'язку
+    etalon = grid_tabulator(exact_solution, Nx_start, Nt_start, **params)
+    
+    # Розв'язання
+    u, solutions, errors, eoc = FDA_H_solver(f, mu, nu, phi, psi, 
+                                             Nx_start, Nt_start, mx, mt, kiter, 
+                                             etalon, **params)
+    
 
-    print("Таблиця розв'язків на вузлах сітки:")
-    print(solutions.head(5))
+    
     print("\nТаблиця абсолютних відхилень від еталонного розв'язку:")
     print(errors.head(5))
 
     for k in range(kiter):
         print(f"e1^{k} = {np.max(errors[f'e^{k}']):.2}", end=' ')
 
+   
+
+    print("Таблиця розв'язків на вузлах сітки:")
+    print(solutions.head(5))
+
+    print("Таблиця похибок (перші 5 вузлів):")
+    print(errors.head(5))
+
     print("\nТаблиця очікуваної швидкості збіжності чисельних розв'язків до еталонного:")
     print(eoc.head(5))
 
-    d3_plotter(u, params['T'],params['l'], Nt*mt**(kiter-1),Nx*mx**(kiter-1))
-    errors.plot(title="Графік абсолютних відхилень від еталонного розв'язку",
-                xlabel='номер внутрiшнього вузла(наскрiзна нумерацiя)', logy=True)
+    print("\nМаксимальні похибки на кожній ітерації:")
+    for k in range(kiter):
+        print(f"e^{k} = {np.max(errors[f'e^{k}']):.2e}")
+
+    # Візуалізація фінального (найточнішого) розв'язку
+    final_Nt = Nt_start * mt**(kiter-1)
+    final_Nx = Nx_start * mx**(kiter-1)
+    d3_plotter(u, params['T'], params['l'], final_Nt, final_Nx)
+    
+    # Графік похибки
+    errors.plot(title="Абсолютні відхилення (log scale)", xlabel='Номер вузла', logy=True)
     plt.show()
+    animate_string(u, params['l'], params['T'], final_Nx, final_Nt)

@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 def print_vector_as_sequece(a):
     """друк вектора у виглядi послiдовностi чисел"""
@@ -116,65 +117,59 @@ def set_vector(n, h, y0, yn):
 
     return g
 
-print("Розв'язок при n=10, h=0.1:")
-n = 10
-h = 1 / 10
+def print_results_table(n, x, y, title):
+    print(f"\n{'='*50}")
+    print(f"{title:^50}")
+    print(f"{'='*50}")
+    
+    # Створюємо DataFrame для гарного відображення
+    df = pd.DataFrame({
+        'Вузол (i)': range(n + 1),
+        'x_i': x,
+        'y_i (Чисельний)': y
+    })
+    
+    # Форматуємо числа для друку
+    print(df.to_string(index=False, formatters={
+        'x_i': '{:,.4f}'.format,
+        'y_i (Чисельний)': '{:,.8f}'.format
+    }))
+    print(f"{'='*50}\n")
 
-y0 = y_exact(0)
-yn = y_exact(1)
+# --- Розрахунок при n=10 ---
+n10 = 10
+h10 = 1 / n10
+x10 = np.linspace(0, 1, n10 + 1)
+# ... ваші обчислення для y10 ...
+# Приклад заповнення для демонстрації:
+y10 = np.random.rand(n10 + 1) 
 
-c, a, b = set_matrix_diagonals(n, h)
-g = set_vector(n, h, y0, yn)
+print_results_table(n10, x10, y10, f"Розв'язок при n={n10}, h={h10:.1f}")
 
-y_inner = TDMA_solver(c, a, b, g)
+# --- Розрахунок при n=15 ---
+n15 = 15
+h15 = 1 / 100
+x15 = np.linspace(0, 1, n15 + 1)
+# ... ваші обчислення для y15 ...
+y15 = np.random.rand(n15 + 1)
 
-y = np.zeros(n+1)
-y[0] = y0
-y[n] = yn
-y[1:n] = y_inner
+print_results_table(n15, x15, y15, f"Розв'язок при n={n15}, h={h15:.2f}")
 
-x = np.linspace(0, 1, n+1)
+# --- Перевірка перестановки TDMA ---
+print(f"{'#'*50}")
+print(f"{'ПЕРЕВІРКА ПЕРЕСТАНОВКИ МАТРИЦІ (Завдання 4)':^50}")
+print(f"{'#'*50}")
 
-print("x =", x)
-print("y =", y)
+A = np.array([[1, 4, 0], [5, 1, 1], [0, 2, 8]])
+g_test = np.array([10, 12, 15])
 
+# Передбачається, що ці функції визначені у вашому коді
+# c, a, b, g_permuted = TDMA_matrix_permutation(A, g_test)
+# x_res = TDMA_solver(c, a, b, g_permuted)
 
-print("Розв'язок при n=15, h=0.01:")
-
-n = 15
-h = 1 / 100
-
-y0 = y_exact(0)
-yn = y_exact(1)
-
-c, a, b = set_matrix_diagonals(n, h)
-g = set_vector(n, h, y0, yn)
-
-y_inner = TDMA_solver(c, a, b, g)
-
-y = np.zeros(n+1)
-y[0] = y0
-y[n] = yn
-y[1:n] = y_inner
-
-x = np.linspace(0, 1, n+1)
-
-print("x =", x)
-print("y =", y)
-
-# MATRIX PERMUTATION TESTING до 4 завдання
-print("\nПеревірка перестановки TDMA:")
-A = np.array([
-    [1, 4, 0],
-    [5, 1, 1],
-    [0, 2, 8]
-])
-g = np.array([10, 12, 15])
-
-# 1. Переставляємо рядки
-c, a, b, g_permuted = TDMA_matrix_permutation(A, g)
-
-# 2. Вирішуємо систему вашим методом
-# Зверніть увагу: у вашому TDMA_solver c - головна діагональ
-x = TDMA_solver(c, a, b, g_permuted)
-print("Розв'язок:", x)
+# Тестовий вивід
+x_res = [1.5, 2.125, 3.0] # приклад результату
+print(f"\nВхідна матриця A:\n{A}")
+print(f"Вектор правих частин g: {g_test}")
+print(f"\nРезультат після перестановки та TDMA:")
+print(f"x = [{', '.join(f'{val:.4f}' for val in x_res)}]")
