@@ -51,3 +51,22 @@ try:
         print(f"10^{(-n):<3} | {k:>8} | {xk[0]:>18.15f} | {xk[1]:>18.15f}")
 except Exception as e:
     print(e)
+
+# Графічна ілюстрація
+x = np.linspace(-1, 3, 400)
+y = np.linspace(-1, 3, 400)
+X, Y = np.meshgrid(x, y)
+Z1 = X**2 * Y**2 - 3*X**3 - 6*Y**3 + 8
+Z2 = X**4 - 9*Y + 2
+plt.figure(figsize=(10, 8))
+contour1 = plt.contour(X, Y, Z1, levels=[0], colors='blue')
+contour2 = plt.contour(X, Y, Z2, levels=[0], colors='red')
+plt.clabel(contour1, inline=True, fontsize=8)
+plt.clabel(contour2, inline=True, fontsize=8)
+plt.title('Графічне представлення системи нелінійних рівнянь')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.grid()
+plt.axhline(0, color='black',linewidth=0.5, ls='--')
+plt.axvline(0, color='black',linewidth=0.5, ls='--')
+plt.show()
